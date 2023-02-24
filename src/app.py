@@ -38,7 +38,6 @@ def ask_for_song():
     member_id = random.choice(members["members"])
     message = generate_message(member_id)
     app.client.chat_postMessage(channel=channel_id, text=message)
-    return True
 
 
 def schedule_loop():
