@@ -16,8 +16,8 @@ Selects a random user in a channel and asks them for their song of the day
 
 ### ToDo
 - [x] Only run on weekdays
+- [x] Different prompt messages
 - [ ] Remove already-asked users from the pool until the pool is depleted
 - [ ] User opt-out
-- [ ] Different prompt messages
 - [ ] Fetch Bot ID in runtime so that it doesn't have to be an env var
 - [ ] Make time-of-day for the question to be asked an env var
