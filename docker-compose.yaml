@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+  musical-chair:
+    container_name: musical-chair
+    build:
+      context: .
+    env_file:
+      - .env

@@ -1,5 +1,5 @@
-# MusicalChair Slack bot
-Selects a random user in a channel and asks them for their song of the day :musical_note:
+# MusicalChair Slack bot :musical_note::chair::question:
+Selects a random user in a channel and asks them for their song of the day
 
 ### OAuth Scopes
 |Scope|Purpose|

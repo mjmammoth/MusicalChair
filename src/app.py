@@ -3,7 +3,6 @@ import time
 import random
 from slack_bolt import App
 
-# token = os.environ.get("SLACK_BOT_TOKEN"),
 channel_id = os.environ.get("SLACK_CHANNEL_ID")
 bot_id = os.environ.get("SLACK_BOT_ID")
 
@@ -26,7 +25,7 @@ def schedule_loop():
         week_day = current_time.tm_wday
         if (
             current_time.tm_wday < 5         # If it's a weekday
-            and current_time.tm_hour == 8   # At around 10AM
+            and current_time.tm_hour == 10   # At around 10AM
             and week_day != cached_week_day  # Run once a day only
         ):
             print('Requesting song of the day from a random group member')
