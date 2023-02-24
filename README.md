@@ -1,6 +1,10 @@
 # MusicalChair Slack bot :musical_note::chair::question:
 Selects a random user in a channel and asks them for their song of the day
 
+
+<img src="avatar.png" alt="MusicalChair avatar, created with MidJourney"
+style="width:725px; height:725px"/>
+
 ### OAuth Scopes
 |Scope|Purpose|
 |-|-|
