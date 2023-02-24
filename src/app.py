@@ -30,7 +30,11 @@ def generate_message(member_id):
 
 def ask_for_song():
     members = app.client.conversations_members(channel=channel_id)
-    members["members"].remove(bot_id)
+    # In some cases Apps are listed as a channel member, other cases not.
+    # Remove it from the list if it exists. This solution doesn't deal with
+    # other Apps and could potentially ask a bot for a song :D
+    if bot_id in members["members"]:
+        members["members"].remove(bot_id)
     member_id = random.choice(members["members"])
     message = generate_message(member_id)
     app.client.chat_postMessage(channel=channel_id, text=message)
