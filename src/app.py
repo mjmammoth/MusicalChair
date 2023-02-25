@@ -2,20 +2,24 @@ import os
 import time
 import random
 import json
+import logging
 
 from slack_bolt import App
 
 from config import settings
 
 app = App()
+logging.basicConfig(level=settings.LOGGING_LEVEL,
+                    format='%(levelname)s:%(asctime)s - %(message)s')
 
 
 def init_persistence():
-    print('Creating initial persistence file')
+    logging.info('Creating initial persistence file')
     bot_id = app.client.auth_test()["user_id"]
-    print(bot_id)
-    data = {'permanent_exclusions': [bot_id], 'already_asked': []}
-    with open(PERSISTENCE_FILE, 'w') as f:
+    data = {'permanent_exclusions': [bot_id],
+            'already_asked': [],
+            'cached_week_day': None}
+    with open(settings.STATE_FILE, 'w') as f:
         json.dump(data, f)
 
 
@@ -39,15 +43,17 @@ def generate_message(member_id):
 
 
 def ask_for_song():
-    with open(PERSISTENCE_FILE, 'r') as f:
+    logging.debug('Asking for the song the day from a random channel member')
+    with open(settings.STATE_FILE, 'r') as f:
         data = json.load(f)
     exclusions = data['permanent_exclusions'] + data['already_asked']
 
-    channel_info = app.client.conversations_members(channel=CHANNEL_ID)
-    channel_members = channel_info['members']
+    channel = app.client.conversations_members(channel=settings.CHANNEL_ID)
+    channel_members = channel['members']
     remaining_pool = [uid for uid in channel_members
                       if uid not in exclusions]
     if not remaining_pool:
+        logging.info('Channel member pool depleted. Refreshing pool.')
         remaining_pool = [uid for uid in channel_members
                           if uid not in data['permanent_exclusions']]
         data['already_asked'] = []
@@ -56,38 +62,71 @@ def ask_for_song():
     message = generate_message(member_id)
     data['already_asked'].append(member_id)
 
-    app.client.chat_postMessage(channel=CHANNEL_ID, text=message)
+    app.client.chat_postMessage(channel=settings.CHANNEL_ID, text=message)
 
-    with open(PERSISTENCE_FILE, 'w') as f:
+    with open(settings.STATE_FILE, 'w') as f:
         json.dump(data, f)
 
 
 def schedule_loop(dev=False):
-    if not dev:
-        wday = 5
-        hour = 10
-    else:
-        wday = 7
-    cached_week_day = None
+    with open(settings.STATE_FILE, 'r') as f:
+        data = json.load(f)
+
+    cached_week_day = (data['cached_week_day']
+                       if data['cached_week_day'] is not None
+                       else None)
+
     while True:
         current_time = time.localtime()
         week_day = current_time.tm_wday
-        if should_send_message():
-            print('Requesting song of the day from a random group member')
-            ask_for_song()
-            cached_week_day = week_day
 
         if (
-            current_time.tm_wday < settings.         # If it's a weekday
-            and current_time.tm_hour > settings.MESSAGE_HOUR   # At around 10AM
-            and week_day != cached_week_day  # Run once a day only
+            current_time.tm_wday < settings.WEEKDAYS
+            and current_time.tm_hour > settings.MESSAGE_HOUR
         ):
+            if not settings.ONCE_A_DAY:
+                ask_for_song()
+            elif week_day != cached_week_day:
+                ask_for_song()
+                data['cached_week_day'] = week_day
+                with open(settings.STATE_FILE, 'w') as f:
+                    json.dump(data, f)
 
         time.sleep(settings.SCHEDULE_TIMER)
 
 
 if __name__ == "__main__":
-    print('MusicalChair bot running')
-    if not os.path.isfile(PERSISTENCE_FILE):
+    print(u"""MusicalChair bot is running! \U0001F3B5\U0001FA91
+                  .,,,.
+               .;;;;;;;;;,
+              ;;;'    `;;;,
+             ;;;'      `;;;
+             ;;;        ;;;
+             ;;;.      ;;;'
+             `;;;.    ;;;'
+              `;;;.  ;;;'
+               `;;',;;'
+                ,;;;'
+             ,;;;',;' ...,,,,...
+          ,;;;'    ,;;;;;;;;;;;;;;,
+       ,;;;'     ,;;;;;;;;;;;;;;;;;;,
+      ;;;;'     ;;;',,,   `';;;;;;;;;;
+     ;;;;,      ;;   ;;;     ';;;;;;;;;
+    ;;;;;;       '    ;;;      ';;;;;;;
+    ;;;;;;            .;;;      ;;;;;;;
+    ;;;;;;,            ;;;;     ;;;;;;'
+     ;;;;;;,            ;;;;   .;;;;;'
+      `;;;;;;,           ;;;; ,;;;;;'
+       `;;;;;;;,,,,,,,,,, ;;;; ;;;'
+          `;;;;;;;;;;;;;;; ;;;; '
+              ''''''''''''' ;;;.
+                   .;;;.    `;;;.
+                  ;;;; '     ;;;;
+                  ;;;;,,,..,;;;;;
+                  `;;;;;;;;;;;;;'
+                    `;;;;;;;;;'
+    """)
+
+    if not os.path.isfile(settings.STATE_FILE):
         init_persistence()
     schedule_loop()
