@@ -1,12 +1,22 @@
 import os
 import time
 import random
+import json
+
 from slack_bolt import App
 
-channel_id = os.environ.get("SLACK_CHANNEL_ID")
-bot_id = os.environ.get("SLACK_BOT_ID")
+from config import settings
 
 app = App()
+
+
+def init_persistence():
+    print('Creating initial persistence file')
+    bot_id = app.client.auth_test()["user_id"]
+    print(bot_id)
+    data = {'permanent_exclusions': [bot_id], 'already_asked': []}
+    with open(PERSISTENCE_FILE, 'w') as f:
+        json.dump(data, f)
 
 
 def generate_message(member_id):
@@ -29,34 +39,55 @@ def generate_message(member_id):
 
 
 def ask_for_song():
-    members = app.client.conversations_members(channel=channel_id)
-    # In some cases Apps are listed as a channel member, other cases not.
-    # Remove it from the list if it exists. This solution doesn't deal with
-    # other Apps and could potentially ask a bot for a song :D
-    if bot_id in members["members"]:
-        members["members"].remove(bot_id)
-    member_id = random.choice(members["members"])
+    with open(PERSISTENCE_FILE, 'r') as f:
+        data = json.load(f)
+    exclusions = data['permanent_exclusions'] + data['already_asked']
+
+    channel_info = app.client.conversations_members(channel=CHANNEL_ID)
+    channel_members = channel_info['members']
+    remaining_pool = [uid for uid in channel_members
+                      if uid not in exclusions]
+    if not remaining_pool:
+        remaining_pool = [uid for uid in channel_members
+                          if uid not in data['permanent_exclusions']]
+        data['already_asked'] = []
+
+    member_id = random.choice(remaining_pool)
     message = generate_message(member_id)
-    app.client.chat_postMessage(channel=channel_id, text=message)
+    data['already_asked'].append(member_id)
+
+    app.client.chat_postMessage(channel=CHANNEL_ID, text=message)
+
+    with open(PERSISTENCE_FILE, 'w') as f:
+        json.dump(data, f)
 
 
-def schedule_loop():
+def schedule_loop(dev=False):
+    if not dev:
+        wday = 5
+        hour = 10
+    else:
+        wday = 7
     cached_week_day = None
     while True:
         current_time = time.localtime()
         week_day = current_time.tm_wday
-        if (
-            current_time.tm_wday < 5         # If it's a weekday
-            and current_time.tm_hour == 10   # At around 10AM
-            and week_day != cached_week_day  # Run once a day only
-        ):
+        if should_send_message():
             print('Requesting song of the day from a random group member')
             ask_for_song()
             cached_week_day = week_day
 
-        time.sleep(45)
+        if (
+            current_time.tm_wday < settings.         # If it's a weekday
+            and current_time.tm_hour > settings.MESSAGE_HOUR   # At around 10AM
+            and week_day != cached_week_day  # Run once a day only
+        ):
+
+        time.sleep(settings.SCHEDULE_TIMER)
 
 
 if __name__ == "__main__":
     print('MusicalChair bot running')
+    if not os.path.isfile(PERSISTENCE_FILE):
+        init_persistence()
     schedule_loop()
