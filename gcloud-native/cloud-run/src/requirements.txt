@@ -1,4 +1,4 @@
-google-cloud-storage==2.7.0
+google-cloud-firestore==2.10.0
 slack-bolt==1.16.2
 slack-sdk==3.20.0
 uvicorn==0.20.0

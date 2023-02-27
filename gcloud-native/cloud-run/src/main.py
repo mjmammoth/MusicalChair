@@ -4,29 +4,29 @@ import json
 
 import uvicorn
 from fastapi import FastAPI
-from google.cloud import storage
+from google.cloud import firestore
 from slack_bolt import App
 
 from messages import generate_message
 
-STORAGE_CLIENT = storage.Client()
+FIRESTORE_CLIENT = firestore.Client()
+DOC_REF = FIRESTORE_CLIENT.collection('exclusions').document('state')
 BUCKET_NAME = os.environ.get("GCP_BUCKET")
-BUCKET = STORAGE_CLIENT.get_bucket(BUCKET_NAME)
 CHANNEL_ID = os.environ.get("SLACK_CHANNEL_ID")
-BLOB = BUCKET.blob("exclusions.json")
 
 slack_app = App()
 web_app = FastAPI()
 
 
 def get_state():
-    if not BLOB.exists():
+    state = DOC_REF.get()
+    if not state.exists:
         bot_id = slack_app.client.auth_test()["user_id"]
         state = {'permanent_exclusions': [bot_id],
-                 'already_asked': [],
-                 'cached_week_day': None}
+                 'already_asked': []}
+        DOC_REF.set(state)
     else:
-        state = json.loads(BLOB.download_as_string())
+        state = state.to_dict()
     return state
 
 
@@ -53,7 +53,7 @@ def ask_for_song():
     slack_app.client.chat_postMessage(channel=CHANNEL_ID, text=message)
 
     state['already_asked'].append(member_id)
-    BLOB.upload_from_string(json.dumps(state))
+    DOC_REF.set(state)
     return {'response': 200}
 
 
