@@ -11,7 +11,6 @@ from messages import generate_message
 
 FIRESTORE_CLIENT = firestore.Client()
 DOC_REF = FIRESTORE_CLIENT.collection('exclusions').document('state')
-BUCKET_NAME = os.environ.get("GCP_BUCKET")
 CHANNEL_ID = os.environ.get("SLACK_CHANNEL_ID")
 
 slack_app = App()
