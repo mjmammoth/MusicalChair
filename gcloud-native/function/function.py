@@ -1,8 +1,8 @@
 import os
 import random
 import json
-from google.cloud import storage
 
+from google.cloud import storage
 from slack_bolt import App
 
 STORAGE_CLIENT = storage.Client()
