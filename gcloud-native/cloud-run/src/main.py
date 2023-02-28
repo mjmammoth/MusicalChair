@@ -3,9 +3,10 @@ import random
 import json
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from google.cloud import firestore
 from slack_bolt import App
+from slack_bolt.adapter.fastapi import SlackRequestHandler
 
 from messages import generate_message
 
@@ -15,6 +16,8 @@ CHANNEL_ID = os.environ.get("SLACK_CHANNEL_ID")
 
 slack_app = App()
 web_app = FastAPI()
+handler = SlackRequestHandler(slack_app)
+web_app.mount("/events", handler)
 
 
 def get_state():
@@ -55,6 +58,11 @@ def ask_for_song():
     DOC_REF.set(state)
     return {'response': 200}
 
+
+@web_app.post("/events", status_code=200)
+async def challenge(body: Request):
+    jsonbody = await body.json()
+    return jsonbody.get("challenge")
 
 if __name__ == "__main__":
     uvicorn.run(web_app, host="0.0.0.0", port=os.environ.get("PORT", 8000))
