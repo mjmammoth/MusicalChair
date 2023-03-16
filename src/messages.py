@@ -27,7 +27,7 @@ def generate_message(member_id):
         "We know you have good taste in music, <@{}>. Share your song of the day with us! :ok_hand:",
         "Breaking news! <@{}>'s song of the day is now a matter of public interest. Bring it to light immediately! :newspaper:",
         "We interrupt this program to urgently request <@{}>'s song of the day. :rotating_light:",
-        "<@{}>, we need your song of the day to keep us from going insane. Help us out! :crazy_face:",
+        "<@{}>, we need your song of the day to keep us from going insane. Help us out! :zany_face:",
         "Okay, <@{}>. We won't judge (much). What's the song that's been stuck in your head all day? :face_with_monocle:",
         "Listen up, <@{}>! We need your song of the day to keep us from falling asleep. Caffeinate us! :coffee:",
         "<@{}>, we're counting on you to save us from the musical abyss with your song of the day. Don't let us down! :musical_note:",
