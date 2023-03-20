@@ -129,5 +129,5 @@ async def update_home_tab(client, event, logger):
     )
 
 
-if __name__ == "__main__":
-    uvicorn.run(web_app, host="0.0.0.0", port=os.environ.get("PORT", 8000))
+if __name__ == '__main__':
+    uvicorn.run('main:web_app', host='0.0.0.0', port=os.environ.get('PORT', 8000), reload=True)
