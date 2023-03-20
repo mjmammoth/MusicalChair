@@ -18,15 +18,16 @@ match deployment_env:
 
 
 class BaseConfig:
-    CHANNEL_ID = os.environ.get("SLACK_CHANNEL_ID")
     STATE_FILE: str = os.environ.get(
         'STATE_FILE', '/mnt/persistence/exclusions.json')
     SCHEDULE_TIMER: int = int(os.environ.get('SCHEDULE_TIMER', 60))
     LOGGING_LEVEL = os.environ.get('LOGGING_LEVEL', "INFO").upper()
-    CHANNEL_ID = os.environ.get("SLACK_CHANNEL_ID")
+    CHANNEL_ID = os.environ.get("CHANNEL_ID")
     COLLECTION = os.environ.get("FIRESTORE_COLLECTION", "musical-chair-slackbot")
-    SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN"),
-    SLACK_SIGNING_SECRET = os.environ.get("SLACK_SIGNING_SECRET"),
+    SLACK_BOT_TOKEN = os.environ.get("SLACK_BOT_TOKEN")
+    SLACK_SIGNING_SECRET = os.environ.get("SLACK_SIGNING_SECRET")
+    BUCKET = os.environ.get("GCS_BUCKET")
+    DEPLOYMENT_ENV = os.environ['DEPLOYMENT_ENV'].lower()
 
 
 def get_env_vars():
