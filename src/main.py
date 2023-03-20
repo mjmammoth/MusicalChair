@@ -9,8 +9,8 @@ from google.cloud import firestore
 from slack_bolt.app.async_app import AsyncApp
 from slack_bolt.adapter.fastapi.async_handler import AsyncSlackRequestHandler
 
-from messages import generate_message
 from config import get_env_vars
+from messages import generate_message
 from playlists import handle_url
 
 settings = get_env_vars()
@@ -35,7 +35,7 @@ handler = AsyncSlackRequestHandler(slack_app)
 def get_state():
     state = DOC_REF.get()
     if not state.exists or state.to_dict()['already_asked'] is None:
-        bot_id = slack_app.client.auth_test()["user_id"]
+        bot_id = asyncio.run(slack_app.client.auth_test())['user_id']
         state = {'permanent_exclusions': [bot_id],
                  'already_asked': []}
         DOC_REF.set(state)
@@ -46,9 +46,10 @@ def get_state():
 
 def get_remaining_pool(state):
     exclusions = state['permanent_exclusions'] + state['already_asked']
-    channel = slack_app.client.conversations_members(
+    channel = asyncio.run(slack_app.client.conversations_members(
             channel=settings.CHANNEL_ID
     )
+    ))
     channel_members = channel['members']
     remaining_pool = [uid for uid in channel_members
                       if uid not in exclusions]
@@ -83,6 +84,8 @@ def ask_for_song():
     message = generate_message(member_id)
     slack_app.client.chat_postMessage(channel=settings.CHANNEL_ID,
                                       text=message)
+    asyncio.run(slack_app.client.chat_postMessage(channel=settings.CHANNEL_ID,
+                                      text=message))
 
     state['already_asked'].append(member_id)
     DOC_REF.set(state)
