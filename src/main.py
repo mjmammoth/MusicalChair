@@ -13,9 +13,14 @@ from config import get_env_vars
 
 settings = get_env_vars()
 
-resp = get_service_url()
-FIRESTORE_CLIENT = firestore.Client()
-DOC_REF = FIRESTORE_CLIENT.collection(settings.COLLECTION).document('state')
+if settings.DEPLOYMENT_ENV == 'local':
+    from storage import LocalFirestore
+    DOC_REF = LocalFirestore()
+else:
+    from service_url import get_service_url
+    resp = get_service_url()
+    FIRESTORE_CLIENT = firestore.Client()
+    DOC_REF = FIRESTORE_CLIENT.collection(settings.COLLECTION).document('state')
 
 slack_app = AsyncApp(
     token=os.environ.get("SLACK_BOT_TOKEN"),
