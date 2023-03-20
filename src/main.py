@@ -10,7 +10,6 @@ from slack_bolt.app.async_app import AsyncApp
 from slack_bolt.adapter.fastapi.async_handler import AsyncSlackRequestHandler
 
 from messages import generate_message
-from service_url import get_service_url
 from config import get_env_vars
 from playlists import handle_url
 
