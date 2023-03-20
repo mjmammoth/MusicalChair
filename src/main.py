@@ -25,8 +25,8 @@ else:
     DOC_REF = FIRESTORE_CLIENT.collection(settings.COLLECTION).document('state')
 
 slack_app = AsyncApp(
-    token=os.environ.get("SLACK_BOT_TOKEN"),
-    signing_secret=os.environ.get("SLACK_SIGNING_SECRET"),
+    token=os.environ.get('SLACK_BOT_TOKEN'),
+    signing_secret=os.environ.get('SLACK_SIGNING_SECRET'),
 )
 web_app = FastAPI()
 handler = AsyncSlackRequestHandler(slack_app)
@@ -48,7 +48,6 @@ def get_remaining_pool(state):
     exclusions = state['permanent_exclusions'] + state['already_asked']
     channel = asyncio.run(slack_app.client.conversations_members(
             channel=settings.CHANNEL_ID
-    )
     ))
     channel_members = channel['members']
     remaining_pool = [uid for uid in channel_members
@@ -61,7 +60,6 @@ def get_remaining_pool(state):
     return remaining_pool, state
 
 
-@web_app.post("/ask-for-song", status_code=200)
 @web_app.post('/backfill-playlists', status_code=200)
 def backfill_playlists():
     result = asyncio.run(
@@ -77,13 +75,12 @@ def backfill_playlists():
     return {'response': 200}
 
 
+@web_app.post('/ask-for-song', status_code=200)
 def ask_for_song():
     state = get_state()
     remaining_pool, state = get_remaining_pool(state)
     member_id = random.choice(remaining_pool)
     message = generate_message(member_id)
-    slack_app.client.chat_postMessage(channel=settings.CHANNEL_ID,
-                                      text=message)
     asyncio.run(slack_app.client.chat_postMessage(channel=settings.CHANNEL_ID,
                                       text=message))
 
@@ -92,19 +89,20 @@ def ask_for_song():
     return {'response': 200}
 
 
-@web_app.post("/slack/events", status_code=200)
+@web_app.post('/slack/events', status_code=200)
 async def handle_slack_event(request: Request):
     # Uncomment this to deal with slack challenge
     # jsonbody = await request.json()
-    # return jsonbody.get("challenge")
+    # return jsonbody.get('challenge')
 
     response = await handler.handle(request)
     return response
 
 
-@slack_app.event("app_mention")
+@slack_app.event('app_mention')
 async def handle_mention(event, say):
-    await say("I received your message!")
+    await say('I received your message!')
+
 
 @slack_app.event('message')
 async def handle_message(event):
@@ -114,9 +112,9 @@ async def handle_message(event):
             handle_url(url)
 
 
-@slack_app.event("app_home_opened")
+@slack_app.event('app_home_opened')
 async def update_home_tab(client, event, logger):
-    user_id = event["user"]
+    user_id = event['user']
     await client.views_publish(
         user_id=user_id,
         view={
