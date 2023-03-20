@@ -1,5 +1,7 @@
+import asyncio
 import os
 import random
+import re
 
 import uvicorn
 from fastapi import FastAPI, Request
@@ -10,6 +12,7 @@ from slack_bolt.adapter.fastapi.async_handler import AsyncSlackRequestHandler
 from messages import generate_message
 from service_url import get_service_url
 from config import get_env_vars
+from playlists import handle_url
 
 settings = get_env_vars()
 
@@ -59,6 +62,21 @@ def get_remaining_pool(state):
 
 
 @web_app.post("/ask-for-song", status_code=200)
+@web_app.post('/backfill-playlists', status_code=200)
+def backfill_playlists():
+    result = asyncio.run(
+        slack_app.client.conversations_history(channel=settings.CHANNEL_ID)
+    )
+    messages = result["messages"]
+    urls = []
+    for message in messages:
+        urls.extend(re.findall(r'(https?://\S[^>]+)', message.get('text', '')))
+
+    for url in urls:
+        handle_url(url)
+    return {'response': 200}
+
+
 def ask_for_song():
     state = get_state()
     remaining_pool, state = get_remaining_pool(state)
@@ -85,6 +103,13 @@ async def handle_slack_event(request: Request):
 @slack_app.event("app_mention")
 async def handle_mention(event, say):
     await say("I received your message!")
+
+@slack_app.event('message')
+async def handle_message(event):
+    if event.get('subtype', None) != 'message_changed':
+        urls = re.findall(r'(https?://\S[^>]+)', event.get('text', ''))
+        for url in urls:
+            handle_url(url)
 
 
 @slack_app.event("app_home_opened")
