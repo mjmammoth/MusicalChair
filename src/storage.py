@@ -1,50 +1,14 @@
-class LocalCollection:
+from config import get_env_vars
 
-    def __init__(self):
-        self.store = dict()
+settings = get_env_vars()
 
-    def to_dict(self):
-        """Mimics GCP Firestore method."""
-        return self.store
-
-    @property
-    def exists(self):
-        """Mimics GCP Firestore method."""
-        return bool(self.store)
-    
-
-class LocalFirestore:
-
-    def __init__(self):
-        self.collection = LocalCollection()
-
-    def get(self):
-        return self.collection
-
-    def set(self, data):
-        self.collection.store = data
-
-
-class LocalBlob:
-
-    def __init__(self):
-        self.data = None
-
-    def upload_from_string(self, data):
-        self.data = data
-
-    def download_as_string(self):
-        return self.data
-
-
-class LocalBucket:
-
-    def __init__(self):
-        self.blobs = dict()
-
-    def get_blob(self, name):
-        return self.blobs.get(name, None)
-
-    def blob(self, name):
-        self.blobs[name] = LocalBlob()
-        return self.blobs[name]
+if settings.DEPLOYMENT_ENV == 'local':
+    from env.local.storage import LocalFirestore, LocalBucket
+    DOC_REF = LocalFirestore()
+    bucket = LocalBucket()
+else:
+    from google.cloud import firestore, storage
+    FIRESTORE_CLIENT = firestore.Client()
+    DOC_REF = FIRESTORE_CLIENT.collection(
+        settings.COLLECTION).document('state')
+    bucket = storage.Client().get_bucket(settings.BUCKET)
