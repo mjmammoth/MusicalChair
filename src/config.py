@@ -41,12 +41,14 @@ class BaseConfig():
     BUCKET = os.environ.get('GCS_BUCKET')
     PORT = os.environ.get('PORT', 8000)
     DEPLOYMENT_ENV = 'local'
+    URL = f'http://127.0.0.1:{PORT}'
 
 
 class GcpConfig(BaseConfig):
-    def __init__(self):
+    def __init__(self, url):
         super().__init__()
         check_for_missing_vars(GOOGLE_ENV_VARS)
+        self.URL = url
 
     REGION = os.getenv("GCP_REGION", "europe-west2")
     SERVICE_NAME = os.getenv("GCP_SERVICE_NAME", "musical-chair-cr")
@@ -57,5 +59,7 @@ def get_env_vars():
     deployment_env = os.environ.get('DEPLOYMENT_ENV', 'GCP').lower()
     if deployment_env == 'local':
         return BaseConfig
-
-    return GcpConfig
+    else:
+        from env.gcp.cloud_run_url import get_service_url
+        url = get_service_url()
+        return GcpConfig(url)

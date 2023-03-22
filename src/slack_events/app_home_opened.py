@@ -1,4 +1,7 @@
+from config import get_env_vars
 from app_instances import slack_app
+
+settings = get_env_vars()
 
 @slack_app.event('app_home_opened')
 async def update_home_tab(client, event, logger):
@@ -33,7 +36,7 @@ async def update_home_tab(client, event, logger):
                                 "emoji": True
                             },
                             "value": "click_me_123",
-                            "url": "https://google.com"
+                            "url": f"{settings.URL}/opt-out"
                         }
                     ]
                 }

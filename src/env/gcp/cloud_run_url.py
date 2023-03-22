@@ -2,13 +2,10 @@ import os
 import google.auth
 from google.cloud import run_v2
 
-from config import get_env_vars
-
-settings = get_env_vars()
+REGION = os.getenv("GCP_REGION", "europe-west2")
+SERVICE_NAME = os.getenv("GCP_SERVICE_NAME", "musical-chair-cr")
 
 creds, project = google.auth.default()
-REGION = settings.REGION
-SERVICE_NAME = settings.SERVICE_NAME
 
 client = run_v2.ServicesClient()
 request = run_v2.GetServiceRequest(
