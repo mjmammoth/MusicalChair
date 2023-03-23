@@ -32,6 +32,7 @@ def handle_song_url(url):
     elif 'youtube' in url:
         update_playlist_blob(url, 'youtube')
 
+
 @router.post('/backfill-playlists', status_code=200)
 async def backfill_playlists():
     result = await slack_app.client.conversations_history(

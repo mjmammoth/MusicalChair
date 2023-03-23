@@ -9,6 +9,7 @@ from app_instances import slack_app
 settings = get_env_vars()
 router = APIRouter()
 
+
 async def get_state():
     state = DOC_REF.get()
     if not state.exists or state.to_dict()['already_asked'] is None:
