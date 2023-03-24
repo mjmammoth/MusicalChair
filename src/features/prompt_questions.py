@@ -1,8 +1,8 @@
 import random
 
 
-def generate_message(member_id):
-    questions = [
+def generate_prompt(member_id):
+    prompts = [
         "Hey there, <@{}>! Give us an earworm! :notes:",
         "<@{}> Are you gonna leave us hanging or will you finally tell us your song of the day? :thinking_face:",
         "Alright, <@{}> - spill the tea. What's the song that's been stuck in your head all day? :tea:",
@@ -49,4 +49,4 @@ def generate_message(member_id):
         "<@{}>! You're our only hope! Please share your song of the day to prevent a musical disaster. :innocent:",
         "<@{}>! We need your song of the day like a bird needs to fly. Help us spread our wings! :bird:",
     ]
-    return random.choice(questions).format(member_id)
+    return random.choice(prompts).format(member_id)

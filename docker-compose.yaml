@@ -8,4 +8,5 @@ services:
     env_file:
       - .env
     volumes:
-      - ./persistence/:/mnt/persistence
+      - ./src:/src
+    ports: [8000:8000/tcp]

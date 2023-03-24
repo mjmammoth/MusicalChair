@@ -30,3 +30,6 @@ style="width:80%; height:80%"/>
 - [x] Better config using env vars
 - [ ] User opt-out
 - [ ] Use time event to trigger workflow instead of having an infinite loop
+
+### Local Dev
+- Use `ngrok` to get a public URL for HTTP events.
