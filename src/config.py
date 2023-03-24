@@ -11,7 +11,7 @@ REQUIRED_ENV_VARS = [
 GOOGLE_ENV_VARS = [
     'GCP_REGION',
     'GCP_SERVICE_NAME',
-    'FIRESTORE_COLLECTION'
+    'GCS_BUCKET',
 ]
 
 
@@ -38,8 +38,8 @@ class BaseConfig():
     COLLECTION = os.environ.get('FIRESTORE_COLLECTION', 'musical-chair-slackbot')
     SLACK_BOT_TOKEN = os.environ.get('SLACK_BOT_TOKEN')
     SLACK_SIGNING_SECRET = os.environ.get('SLACK_SIGNING_SECRET')
-    BUCKET = os.environ.get('GCS_BUCKET')
-    PORT = os.environ.get('PORT', 8000)
+    BUCKET = os.environ.get('GCS_BUCKET', 'local-bucket')
+    PORT = int(os.environ.get('PORT', '8000'))
     DEPLOYMENT_ENV = 'local'
     URL = f'http://127.0.0.1:{PORT}'
 
@@ -50,8 +50,8 @@ class GcpConfig(BaseConfig):
         check_for_missing_vars(GOOGLE_ENV_VARS)
         self.URL = url
 
-    REGION = os.getenv("GCP_REGION", "europe-west2")
-    SERVICE_NAME = os.getenv("GCP_SERVICE_NAME", "musical-chair-cr")
+    REGION = os.getenv("GCP_REGION")
+    SERVICE_NAME = os.getenv("GCP_SERVICE_NAME")
     DEPLOYMENT_ENV = 'GCP'
 
 
@@ -63,3 +63,6 @@ def get_env_vars():
         from env.gcp.cloud_run_url import get_service_url
         url = get_service_url()
         return GcpConfig(url)
+
+
+settings = get_env_vars()

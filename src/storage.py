@@ -1,6 +1,4 @@
-from config import get_env_vars
-
-settings = get_env_vars()
+from config import settings
 
 if settings.DEPLOYMENT_ENV == 'local':
     from env.local.storage import LocalFirestore, LocalBucket
@@ -11,4 +9,4 @@ else:
     FIRESTORE_CLIENT = firestore.Client()
     DOC_REF = FIRESTORE_CLIENT.collection(
         settings.COLLECTION).document('state')
-    bucket = storage.Client().get_bucket(settings.BUCKET)
+    bucket = storage.Client().bucket(settings.BUCKET)

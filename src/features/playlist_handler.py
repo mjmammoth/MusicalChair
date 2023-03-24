@@ -3,21 +3,18 @@ import re
 
 from fastapi import APIRouter
 
-from config import get_env_vars
+from config import settings
 from app_instances import slack_app
 from storage import bucket
 
-settings = get_env_vars()
 router = APIRouter()
 
 
 def update_playlist_blob(url, platform):
-    blob = bucket.get_blob(f'{platform}_playlist')
-    if not blob:
-        blob = bucket.blob(f'{platform}_playlist')
+    blob = bucket.blob(f'{platform}_playlist')
 
-    playlist = blob.download_as_string()
-    if playlist:
+    if blob.exists():
+        playlist = blob.download_as_string()
         playlist = json.loads(playlist)
     else:
         playlist = []

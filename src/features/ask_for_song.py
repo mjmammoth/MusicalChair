@@ -1,12 +1,11 @@
 import random
 from fastapi import APIRouter
 
-from config import get_env_vars
+from config import settings
 from .prompt_questions import generate_prompt
 from storage import DOC_REF
 from app_instances import slack_app
 
-settings = get_env_vars()
 router = APIRouter()
 
 

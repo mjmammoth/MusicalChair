@@ -1,7 +1,6 @@
-from config import get_env_vars
+from config import settings
 from app_instances import slack_app
 
-settings = get_env_vars()
 
 @slack_app.event('app_home_opened')
 async def update_home_tab(client, event, logger):

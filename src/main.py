@@ -1,10 +1,9 @@
 import uvicorn
 
-from config import get_env_vars
+from config import settings
 from app_instances import web_app
 from router import router
 
-settings = get_env_vars()
 web_app.include_router(router)
 
 if __name__ == '__main__':
@@ -12,5 +11,6 @@ if __name__ == '__main__':
         print('Running in local mode')
     else:
         print('Running in GCP Native mode')
+
     uvicorn.run('main:web_app', host='0.0.0.0',
                 port=settings.PORT, reload=True)
