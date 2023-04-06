@@ -3,10 +3,11 @@ from fastapi import APIRouter
 
 from config import settings
 from .prompt_questions import generate_prompt
-from storage import DOC_REF
+from storage import FIRESTORE_CLIENT
 from app_instances import slack_app
 
 router = APIRouter()
+DOC_REF = FIRESTORE_CLIENT.collection(settings.COLLECTION).document('state')
 
 
 async def get_state():

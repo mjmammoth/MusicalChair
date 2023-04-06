@@ -36,6 +36,7 @@ class BaseConfig():
     LOGGING_LEVEL = os.environ.get('LOGGING_LEVEL', 'INFO').upper()
     CHANNEL_ID = os.environ.get('SLACK_CHANNEL_ID')
     COLLECTION = os.environ.get('FIRESTORE_COLLECTION', 'musical-chair-slackbot')
+    SONG_COLLECTION = os.environ.get('FIRESTORE_COLLECTION', 'musical-chair-slackbot-songs')
     SLACK_BOT_TOKEN = os.environ.get('SLACK_BOT_TOKEN')
     SLACK_SIGNING_SECRET = os.environ.get('SLACK_SIGNING_SECRET')
     BUCKET = os.environ.get('GCS_BUCKET', 'local-bucket')
