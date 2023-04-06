@@ -1,3 +1,6 @@
+from google.cloud import firestore
+
+
 class FirestoreClientMock:
     def __init__(self):
         self.data = {}
@@ -9,10 +12,8 @@ class FirestoreClientMock:
 
 
 class CollectionReferenceMock:
-
     def __init__(self, data):
         self.data = data
-        self.query_results = None
 
     def document(self, doc_id):
         if doc_id not in self.data:
@@ -25,13 +26,7 @@ class CollectionReferenceMock:
         return DocumentReferenceMock(self.data[doc_id])
 
     def where(self, field, op, value):
-        if op == '==':
-            self.query_results = [doc for doc in self.data.values() if doc.get(field) == value]
-        elif op == '<':
-            self.query_results = [doc for doc in self.data.values() if doc.get(field) < value]
-        elif op == '>':
-            self.query_results = [doc for doc in self.data.values() if doc.get(field) > value]
-        return self
+        return QueryReferenceMock(self).where(field, op, value)
 
     def order_by(self, field):
         if self.query_results is not None:
@@ -44,14 +39,44 @@ class CollectionReferenceMock:
         return self
 
     def get(self):
-        if self.query_results is not None:
-            return QuerySnapshotMock(self.query_results, self)
+        if not self.data:
+            return QuerySnapshotMock([])
         else:
-            return QuerySnapshotMock(list(self.data.values()), self)
+            return QuerySnapshotMock(list(self.data.values()))
+
+
+class QueryReferenceMock:
+    def __init__(self, collection_ref):
+        self.collection_ref = collection_ref
+        self.conditions = []
+
+    def where(self, field, op, value):
+        self.conditions.append((field, op, value))
+        return self
+
+    def get(self):
+        query_results = self.collection_ref.data.values()
+        for field, op, value in self.conditions:
+            if op == '==':
+                query_results = [doc for doc in query_results if doc.get(field) == value]
+            elif op == '<':
+                query_results = [doc for doc in query_results if doc.get(field) < value]
+            elif op == '>':
+                query_results = [doc for doc in query_results if doc.get(field) > value]
+            else:
+                raise ValueError(f'Invalid operator: {op}')
+        return QuerySnapshotMock(query_results)
+
+    def order_by(self, field):
+        # ...
+        return self
+
+    def limit(self, limit):
+        # ...
+        return self
 
 
 class DocumentReferenceMock:
-
     def __init__(self, data):
         self.data = data
 
@@ -61,17 +86,31 @@ class DocumentReferenceMock:
     def set(self, data):
         self.data.update(data)
 
+    def update(self, data):
+        for key, value in data.items():
+            if isinstance(value, firestore.ArrayUnion):
+                if key not in self.data:
+                    self.data[key] = []
+                self.data[key].extend(value.values)
+            else:
+                self.data[key] = value
+
 
 class QuerySnapshotMock:
-    def __init__(self, data, collection_ref):
+    def __init__(self, data):
         self.data = data
-        self.collection_ref = collection_ref
 
     def __iter__(self):
         return iter([DocumentSnapshotMock(doc) for doc in self.data])
 
     def __getitem__(self, index):
         return DocumentSnapshotMock(self.data[index])
+
+    def __len__(self):
+        return len(self.data)
+
+    def __str__(self):
+        return str(self.data)
 
 
 class DocumentSnapshotMock:
