@@ -1,50 +1,48 @@
-class LocalCollection:
-
+class FirestoreClientMock:
     def __init__(self):
-        self.store = dict()
+        self.data = {}
+
+    def collection(self, name):
+        if name not in self.data:
+            self.data[name] = {}
+        return CollectionReferenceMock(self.data[name])
+
+
+class CollectionReferenceMock:
+
+    def __init__(self, data):
+        self.data = data
+
+    def document(self, doc_id):
+        if doc_id not in self.data:
+            self.data[doc_id] = {}
+        return DocumentReferenceMock(self.data[doc_id])
+
+    def add(self, data):
+        doc_id = str(len(self.data) + 1)
+        self.data[doc_id] = data
+        return DocumentReferenceMock(self.data[doc_id])
+
+
+class DocumentReferenceMock:
+
+    def __init__(self, data):
+        self.data = data
+
+    def get(self):
+        return DocumentSnapshotMock(self.data)
+
+    def set(self, data):
+        self.data.update(data)
+
+
+class DocumentSnapshotMock:
+    def __init__(self, data):
+        self.data = data
 
     def to_dict(self):
-        """Mimics GCP Firestore method."""
-        return self.store
+        return self.data
 
     @property
     def exists(self):
-        """Mimics GCP Firestore method."""
-        return bool(self.store)
-
-
-class LocalFirestore:
-
-    def __init__(self):
-        self.collection = LocalCollection()
-
-    def get(self):
-        return self.collection
-
-    def set(self, data):
-        self.collection.store = data
-
-
-class LocalBlob:
-
-    def __init__(self):
-        self.data = None
-
-    def upload_from_string(self, data):
-        self.data = data
-
-    def download_as_string(self):
-        return self.data
-
-
-class LocalBucket:
-
-    def __init__(self):
-        self.blobs = dict()
-
-    def get_blob(self, name):
-        return self.blobs.get(name, None)
-
-    def blob(self, name):
-        self.blobs[name] = LocalBlob()
-        return self.blobs[name]
+        return bool(self.data)
