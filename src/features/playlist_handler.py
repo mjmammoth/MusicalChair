@@ -1,6 +1,6 @@
 import re
 
-from fastapi import APIRouter
+from fastapi import APIRouter, BackgroundTasks
 from google.cloud import firestore
 
 from config import settings
@@ -20,7 +20,7 @@ def add_song_to_firestore(song_data):
                 .get()
             )
 
-    if query:
+    if len(query) > 0:
         # If the song exists, update the 'posts' array with the new post
         song_ref = query[0].reference
         song_ref.update({
@@ -31,8 +31,7 @@ def add_song_to_firestore(song_data):
         SONG_COLLECTION.add(song_data)
 
 
-async def handle_song_url(url, event):
-    print(f'Handling song url: {url}')
+def handle_song_url(url, event):
     song_data = {
         "original_source": "youtube" if "youtube" in url else "spotify",
         "youtube_url": url if "youtube" in url else "",
@@ -53,8 +52,7 @@ async def handle_song_url(url, event):
     add_song_to_firestore(song_data)
 
 
-@router.post('/backfill-playlists', status_code=200)
-async def backfill_playlists():
+async def backfill_process_messages():
     result = await slack_app.client.conversations_history(
         channel=settings.CHANNEL_ID)
     messages = result["messages"]
@@ -67,6 +65,11 @@ async def backfill_playlists():
 
         urls = re.findall(r'(https?://\S[^>]+)', message.get('text', ''))
         for url in urls:
-            await handle_song_url(url, message)
+            handle_song_url(url, message)
 
+
+@router.post('/backfill-playlists', status_code=200)
+async def backfill_playlists(background_tasks: BackgroundTasks):
+    # Async task to process messages
+    background_tasks.add_task(backfill_process_messages)
     return {'response': 200}
