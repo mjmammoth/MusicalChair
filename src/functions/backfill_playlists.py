@@ -1,13 +1,11 @@
 import re
 
-from fastapi import APIRouter, BackgroundTasks
 from google.cloud import firestore
 
 from config import settings
 from app_instances import slack_app
 from storage import FIRESTORE_CLIENT
 
-router = APIRouter()
 SONG_COLLECTION = FIRESTORE_CLIENT.collection(settings.SONG_COLLECTION)
 
 
@@ -31,7 +29,7 @@ def add_song_to_firestore(song_data):
         SONG_COLLECTION.add(song_data)
 
 
-def handle_song_url(url, event):
+def handle_media_url(url, event):
     song_data = {
         "original_source": "youtube" if "youtube" in url else "spotify",
         "youtube_url": url if "youtube" in url else "",
@@ -52,24 +50,38 @@ def handle_song_url(url, event):
     add_song_to_firestore(song_data)
 
 
-async def backfill_process_messages():
-    result = await slack_app.client.conversations_history(
-        channel=settings.CHANNEL_ID)
-    messages = result["messages"]
+async def backfill_playlists_process_messages():
+    messages = []
+    next_cursor = None
 
+    print("Starting backfilling media data...")
+    print("Getting all messages from the channel...")
+    while True:
+        result = await slack_app.client.conversations_history(
+            channel=settings.CHANNEL_ID,
+            cursor=next_cursor
+        )
+        messages.extend(result['messages'])
+        next_cursor = result.get('response_metadata', {}).get('next_cursor')
+        if not next_cursor:
+            break
+
+    counter = 0
+    bot_id = await slack_app.client.auth_test()
+    url_pattern = re.compile(r'(https?://\S[^>]+)')
+
+    print("Processing messages...")
     for message in messages:
         # Skip messages from the bot
-        bot_id = await slack_app.client.auth_test()
         if message.get('user') == bot_id['user_id']:
             continue
 
-        urls = re.findall(r'(https?://\S[^>]+)', message.get('text', ''))
+        urls = url_pattern.findall(message.get('text', ''))
+
         for url in urls:
-            handle_song_url(url, message)
+            if 'youtube' in url or 'spotify' in url:
+                counter += 1
+                handle_media_url(url, message)
 
-
-@router.post('/backfill-playlists', status_code=200)
-async def backfill_playlists(background_tasks: BackgroundTasks):
-    # Async task to process messages
-    background_tasks.add_task(backfill_process_messages)
-    return {'response': 200}
+    print('Done backfilling media data!')
+    print(f'Added {counter} songs to the Firestore collection')
