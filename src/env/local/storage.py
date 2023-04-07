@@ -95,6 +95,11 @@ class DocumentReferenceMock:
             else:
                 self.data[key] = value
 
+    @property
+    def exists(self):
+        return bool(self.data)
+
+
 
 class QuerySnapshotMock:
     def __init__(self, data):
