@@ -40,7 +40,7 @@ class BaseConfig():
     SLACK_SIGNING_SECRET = os.environ.get('SLACK_SIGNING_SECRET')
     PORT = int(os.environ.get('PORT', '8000'))
     DEPLOYMENT_ENV = 'local'
-    URL = f'http://127.0.0.1:{PORT}'
+    URL = os.environ.get('LOCAL_URL', f'http://127.0.0.1:{PORT}')
 
 
 class GcpConfig(BaseConfig):
