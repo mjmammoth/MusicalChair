@@ -24,13 +24,15 @@ style="width:80%; height:80%"/>
 * [`ngrok`](https://ngrok.com/), used to forward an https URL to your local machine, needed to test slack [events](https://api.slack.com/events) and actions
 
 Once the prerequisites are satisfied, you can begin a development environment by doing the following:
-1. Use [`ngrok`|https://ngrok.com/] to forward traffic to your local machine:
+1. Use ngrok to forward traffic to your local machine, copy the URL.
 ```ngrok http 8000```
 2. Additional to the required environment variables above, add these to your `.env` file:
+
 |Name|Description|
 |-|-|
 |`DEPLOYMENT_ENV`|Set to `Local` to enable local development mocking|
 |`LOCAL_URL`|Set to the https URL obtained from `ngrok`|
+
 3. Start the docker compose application (in older docker versions, `docker-compose` needed to be downloaded separately)
 ```
 docker compose up -d --build && docker compose logs -f
