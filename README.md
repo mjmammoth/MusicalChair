@@ -19,9 +19,13 @@ style="width:80%; height:80%"/>
 
 ### Local Dev
 #### Prerequisites
-* A slack workspace to which you can add a bot and edit its permissions, [create one](https://slack.com/get-started#/createnew) if needed.
+* A slack workspace to which you can add a bot and edit its permissions, [create one](https://slack.com/get-started#/createnew) if needed, adding the OAuth scopes listed above.
 * `Docker` - the app is containerised and the development environment uses `docker compose`
 * [`ngrok`](https://ngrok.com/), used to forward an https URL to your local machine, needed to test slack [events](https://api.slack.com/events) and actions
+* Set up your slack app by going to the app home under [Slack Apps](https://api.slack.com/apps)
+  * Under **Features > Interactivity & Shortcuts**, enable and configure the URL to `{ngrok_url}/slack/actions`
+  * Under **Features > Event Subscriptions**, enable and configure the URL to `{ngrok_url}/slack/events`
+    * Subscribe to the following events: `app_home_opened`, `app_mention` and `message.channels`
 
 Once the prerequisites are satisfied, you can begin a development environment by doing the following:
 1. Use ngrok to forward traffic to your local machine, copy the URL.
