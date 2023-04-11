@@ -44,6 +44,12 @@ class CollectionReferenceMock:
         else:
             return QuerySnapshotMock(list(self.data.values()))
 
+    def stream(self):
+        if not self.data:
+            return iter([])
+        else:
+            return iter([DocumentSnapshotMock(doc) for doc in self.data.values()])
+
 
 class QueryReferenceMock:
     def __init__(self, collection_ref):
@@ -94,6 +100,11 @@ class DocumentReferenceMock:
                 self.data[key].extend(value.values)
             else:
                 self.data[key] = value
+
+    @property
+    def exists(self):
+        return bool(self.data)
+
 
 
 class QuerySnapshotMock:
