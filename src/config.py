@@ -3,7 +3,6 @@ import textwrap
 
 REQUIRED_ENV_VARS = [
     'SLACK_CHANNEL_ID',
-    'SLACK_BOT_TOKEN',
     'SLACK_SIGNING_SECRET',
 ]
 
@@ -36,7 +35,6 @@ class BaseConfig():
     CHANNEL_ID = os.environ.get('SLACK_CHANNEL_ID')
     COLLECTION = os.environ.get('FIRESTORE_COLLECTION', 'musical-chair-slackbot')
     SONG_COLLECTION = os.environ.get('FIRESTORE_SONG_COLLECTION', 'musical-chair-slackbot-songs')
-    SLACK_BOT_TOKEN = os.environ.get('SLACK_BOT_TOKEN')
     SLACK_SIGNING_SECRET = os.environ.get('SLACK_SIGNING_SECRET')
     PORT = int(os.environ.get('PORT', '8000'))
     DEPLOYMENT_ENV = 'local'

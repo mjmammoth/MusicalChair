@@ -15,7 +15,6 @@ oauth_settings = AsyncOAuthSettings(
 
 # To avoid circular imports, we create the app instances here
 slack_app = AsyncApp(
-    token=settings.SLACK_BOT_TOKEN,
     signing_secret=settings.SLACK_SIGNING_SECRET,
     oauth_settings=oauth_settings
 )

@@ -5,8 +5,7 @@ from .ask_for_song_prompts import generate_prompt
 
 
 async def ask_for_song():
-    # remaining_pool = await state.get_remaining_pool()
-    # member_id = random.choice(remaining_pool)
+    """Ask for song, meant to be called from a cron job"""
     member_id = await sotd_state.get_random_member_from_pool()
     message = generate_prompt(member_id)
     await slack_app.client.chat_postMessage(channel=settings.CHANNEL_ID,
