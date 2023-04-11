@@ -28,7 +28,7 @@ style="width:80%; height:80%"/>
   * Under **Features > Interactivity & Shortcuts**, enable and configure the URL to `{ngrok_url}/slack/actions`
   * Under **Features > Event Subscriptions**, enable and configure the URL to `{ngrok_url}/slack/events`
     * Subscribe to the following events: `app_home_opened`, `app_mention` and `message.channels`
-*. Additional to the required standard environment variables, add these to your `.env` file:
+* Additional to the required standard environment variables, add these to your `.env` file:
 
 |Name|Description|
 |-|-|
