@@ -57,7 +57,7 @@ async def home_view_template():
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": "Providing an opportunity for everyone to discover new music and connect over shared interests.\n\nBroaden your horizons and get to know your colleagues better by participating!"
+                    "text": ":musical_score: Discover new music and connect over shared interests."
                 }
             },
             {
@@ -80,12 +80,8 @@ footer = [
         "elements": [
                 {
                     "type": "mrkdwn",
-                    "text": "Musical Chair is an <https://github.com/mjmammoth/MusicalChair|open-source project>, contributions are welcome :leftwards_arrow_with_hook:"
+                    "text": "MusicalChair is an <https://github.com/mjmammoth/MusicalChair|open-source project>, contributions are welcome :leftwards_arrow_with_hook:"
                 },
-            {
-                    "type": "plain_text",
-                    "text": "Author: M J Marryatt",
-            }
         ]
     }
 ]
