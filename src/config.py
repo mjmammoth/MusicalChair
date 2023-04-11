@@ -15,6 +15,7 @@ GOOGLE_ENV_VARS = [
 
 
 def check_for_missing_vars(var_list):
+    """Checks for missing environment variables and raises an error if any are missing"""
     missing_vars = []
     for var in var_list:
         if var not in os.environ:
@@ -55,6 +56,7 @@ class GcpConfig(BaseConfig):
 
 
 def get_env_vars():
+    """Returns the correct config class based on the deployment environment"""
     deployment_env = os.environ.get('DEPLOYMENT_ENV', 'GCP').lower()
     if deployment_env == 'local':
         return BaseConfig
