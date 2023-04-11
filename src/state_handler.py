@@ -7,7 +7,7 @@ from app_instances import slack_app
 doc = FIRESTORE_CLIENT.collection(settings.COLLECTION).document('state')
 
 
-class StateHandler:
+class SongOfTheDayStateHandler:
     def __init__(self):
         self.state = None
 
@@ -92,4 +92,4 @@ class StateHandler:
         return round((1 / remaining_pool_size) * 100)
 
 
-state = StateHandler()
+sotd_state = SongOfTheDayStateHandler()

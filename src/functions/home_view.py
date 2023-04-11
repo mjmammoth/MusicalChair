@@ -1,10 +1,10 @@
 from config import settings
 from app_instances import slack_app
-from state_handler import state
+from state_handler import sotd_state
 
 
 async def get_user_home_block(user_id):
-    user_in_pool = await state.is_user_in_pool(user_id)
+    user_in_pool = await sotd_state.is_user_in_pool(user_id)
 
     # User currently excluded from pool
     status_text = ":x: You are currently *excluded* from song-of-the-day selections."
@@ -12,7 +12,7 @@ async def get_user_home_block(user_id):
     button_action = "scheduled_question_opt_in"
 
     if user_in_pool:
-        percentage_likely_to_be_asked_next = await state.get_percent_likely_to_be_asked(user_id)
+        percentage_likely_to_be_asked_next = await sotd_state.get_percent_likely_to_be_asked(user_id)
         if percentage_likely_to_be_asked_next == 0:
             percent_message = ":bar_chart: You have already been asked for your song-of-the-day. You will be asked again when everyone else has been asked."
         else:
