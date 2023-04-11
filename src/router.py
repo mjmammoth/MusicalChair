@@ -1,6 +1,9 @@
+import os
+
 from fastapi import APIRouter, Request, BackgroundTasks
 from fastapi.responses import FileResponse
 from slack_bolt.adapter.fastapi.async_handler import AsyncSlackRequestHandler
+from slack_sdk.errors import SlackApiError
 
 from app_instances import slack_app
 from functions import backfill_playlists_process_messages, ask_for_song
@@ -47,3 +50,26 @@ async def get_header_image():
     only work if the are available publicly.
     """
     return FileResponse('header.png')
+
+
+@router.get('/slack/oauth')
+async def oauth(request: Request):
+    # Get the temporary authorization code from the request URL
+    code = request.query_params.get('code')
+    print(code)
+
+    try:
+        # Exchange the temporary code for an access token using the SlackClient instance
+        response = await slack_app.client.oauth_v2_access(
+            code=code,
+            client_id=os.environ["SLACK_APP_CLIENT_ID"],
+            client_secret=os.environ["SLACK_APP_CLIENT_SECRET"]
+        )
+
+        # Save the access token and other user-specific data in your app's database
+        user_id = response['authed_user']['id']
+        access_token = response['access_token']
+        print(user_id, access_token)
+        return 'Successfully authenticated!'
+    except SlackApiError as e:
+        return 'Error: {}'.format(e)
