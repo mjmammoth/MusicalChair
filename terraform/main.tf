@@ -44,7 +44,7 @@ resource "google_storage_bucket" "tfstate" {
 # To use the above bucket as a backend for terraform:
 # 1. Apply this terraform file using `terraform apply` which will use a local state file
 #    - The apply creates the bucket that will be used as a backend for terraform
-# 2. Uncomment the following backend configuration and run `terraform init` which will see that the 
+# 2. Uncomment the following backend configuration and run `terraform init` which will see that the
 #    state location has changed and will ask if you want to migrate the state to the new location.
 #    Enter `yes` to migrate the state to the new location.
 
@@ -158,4 +158,3 @@ resource "google_cloud_scheduler_job" "musical_chair_job" {
     http_method = "POST"
   }
 }
-

@@ -2,22 +2,21 @@ import random
 
 from config import settings
 from storage import FIRESTORE_CLIENT
-from app_instances import slack_app
 
 doc = FIRESTORE_CLIENT.collection(settings.COLLECTION).document('state')
 
 
 class SongOfTheDayStateHandler:
-    def __init__(self):
+    def __init__(self, slack_client):
+        self.slack_client = slack_client
         self.state = None
 
     async def get_state(self):
         if self.state is None:
             state = doc.get()
             if not state.exists or state.to_dict()['already_asked'] is None:
-                bot_id = await slack_app.client.auth_test()
-                bot_id = bot_id['user_id']
-                state = {'permanent_exclusions': [bot_id],
+                bot_id = await self.slack_client.auth_test()
+                state = {'permanent_exclusions': [bot_id['user_id']],
                          'already_asked': []}
                 doc.set(state)
             else:
@@ -66,7 +65,7 @@ class SongOfTheDayStateHandler:
     async def get_remaining_pool(self):
         state = await self.get_state()
         exclusions = await self.get_all_exclusions()
-        channel = await slack_app.client.conversations_members(
+        channel = await self.slack_client.conversations_members(
             channel=settings.CHANNEL_ID
         )
         channel_members = channel['members']
@@ -90,6 +89,3 @@ class SongOfTheDayStateHandler:
         remaining_pool = await self.get_remaining_pool()
         remaining_pool_size = len(remaining_pool)
         return round((1 / remaining_pool_size) * 100)
-
-
-sotd_state = SongOfTheDayStateHandler()

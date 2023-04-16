@@ -3,7 +3,6 @@ import textwrap
 
 REQUIRED_ENV_VARS = [
     'SLACK_CHANNEL_ID',
-    'SLACK_BOT_TOKEN',
     'SLACK_SIGNING_SECRET',
 ]
 
@@ -34,13 +33,16 @@ class BaseConfig():
 
     LOGGING_LEVEL = os.environ.get('LOGGING_LEVEL', 'INFO').upper()
     CHANNEL_ID = os.environ.get('SLACK_CHANNEL_ID')
-    COLLECTION = os.environ.get('FIRESTORE_COLLECTION', 'musical-chair-slackbot')
-    SONG_COLLECTION = os.environ.get('FIRESTORE_SONG_COLLECTION', 'musical-chair-slackbot-songs')
-    SLACK_BOT_TOKEN = os.environ.get('SLACK_BOT_TOKEN')
+    COLLECTION = os.environ.get(
+        'FIRESTORE_COLLECTION', 'musical-chair-slackbot')
+    SONG_COLLECTION = os.environ.get(
+        'FIRESTORE_SONG_COLLECTION', 'musical-chair-slackbot-songs')
     SLACK_SIGNING_SECRET = os.environ.get('SLACK_SIGNING_SECRET')
     PORT = int(os.environ.get('PORT', '8000'))
     DEPLOYMENT_ENV = 'local'
     URL = os.environ.get('LOCAL_URL', f'http://127.0.0.1:{PORT}')
+    SLACK_APP_CLIENT_ID = os.environ.get('SLACK_APP_CLIENT_ID')
+    SLACK_APP_CLIENT_SECRET = os.environ.get('SLACK_APP_CLIENT_SECRET')
 
 
 class GcpConfig(BaseConfig):
@@ -49,8 +51,8 @@ class GcpConfig(BaseConfig):
         check_for_missing_vars(GOOGLE_ENV_VARS)
         self.URL = url
 
-    REGION = os.getenv("GCP_REGION")
-    SERVICE_NAME = os.getenv("GCP_SERVICE_NAME")
+    REGION = os.getenv('GCP_REGION')
+    SERVICE_NAME = os.getenv('GCP_SERVICE_NAME')
     DEPLOYMENT_ENV = 'GCP'
 
 

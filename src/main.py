@@ -3,8 +3,6 @@ import uvicorn
 from config import settings
 from app_instances import web_app
 from router import router
-import slack_events
-import slack_actions
 
 web_app.include_router(router)
 

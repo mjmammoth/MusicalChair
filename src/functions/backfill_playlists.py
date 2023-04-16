@@ -12,11 +12,11 @@ SONG_COLLECTION = FIRESTORE_CLIENT.collection(settings.SONG_COLLECTION)
 def add_song_to_firestore(song_data):
     # Check if the song already exists in the Firestore collection
     query = (
-                SONG_COLLECTION
-                .where('youtube_url', '==', song_data['youtube_url'])
-                .where('spotify_url', '==', song_data['spotify_url'])
-                .get()
-            )
+        SONG_COLLECTION
+        .where('youtube_url', '==', song_data['youtube_url'])
+        .where('spotify_url', '==', song_data['spotify_url'])
+        .get()
+    )
 
     if len(query) > 0:
         # If the song exists, update the 'posts' array with the new post
@@ -31,19 +31,19 @@ def add_song_to_firestore(song_data):
 
 def handle_media_url(url, event):
     song_data = {
-        "original_source": "youtube" if "youtube" in url else "spotify",
-        "youtube_url": url if "youtube" in url else "",
-        "spotify_url": url if "spotify" in url else "",
-        "metadata": {
-            "genre": [],
-            "artist": "",
-            "song_name": "",
-            "album": ""
+        'original_source': 'youtube' if 'youtube' in url else 'spotify',
+        'youtube_url': url if 'youtube' in url else '',
+        'spotify_url': url if 'spotify' in url else '',
+        'metadata': {
+            'genre': [],
+            'artist': '',
+            'song_name': '',
+            'album': ''
         },
-        "posts": [
+        'posts': [
             {
-                "date": event.get('ts', ''),
-                "user_id": event.get('user', '')
+                'date': event.get('ts', ''),
+                'user_id': event.get('user', '')
             }
         ]
     }
@@ -54,8 +54,8 @@ async def backfill_playlists_process_messages():
     messages = []
     next_cursor = None
 
-    print("Starting backfilling media data...")
-    print("Getting all messages from the channel...")
+    print('Starting backfilling media data...')
+    print('Getting all messages from the channel...')
     while True:
         result = await slack_app.client.conversations_history(
             channel=settings.CHANNEL_ID,
@@ -70,7 +70,7 @@ async def backfill_playlists_process_messages():
     bot_id = await slack_app.client.auth_test()
     url_pattern = re.compile(r'(https?://\S[^>]+)')
 
-    print("Processing messages...")
+    print('Processing messages...')
     for message in messages:
         # Skip messages from the bot
         if message.get('user') == bot_id['user_id']:

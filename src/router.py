@@ -1,12 +1,20 @@
 from fastapi import APIRouter, Request, BackgroundTasks
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse
 from slack_bolt.adapter.fastapi.async_handler import AsyncSlackRequestHandler
+from slack_sdk.web.async_client import AsyncWebClient
 
 from app_instances import slack_app
-from functions import backfill_playlists_process_messages, ask_for_song
+from functions import backfill_playlists_process_messages, ask_for_song, get_bot_token_for_team
+
 
 router = APIRouter()
 handler = AsyncSlackRequestHandler(slack_app)
+
+
+def get_slack_client(team_id):
+    """Get the slack client for a team"""
+    token = get_bot_token_for_team(team_id)
+    return AsyncWebClient(token=token)
 
 
 @router.post('/slack/events', status_code=200)
@@ -23,10 +31,18 @@ async def route_handle_action(request: Request):
     return response
 
 
+@router.post('/slack/commands', status_code=200)
+async def route_handle_slack_commands(request: Request):
+    """Handle Slack events"""
+    response = await handler.handle(request)
+    return response
+
+
 @router.post('/ask-for-song', status_code=200)
-async def route_ask_for_song():
+async def route_ask_for_song(body: dict):
     """Ask for song, meant to be called from a cron job"""
-    await ask_for_song()
+    client = get_slack_client(body['team_id'])
+    await ask_for_song(client)
     return {'response': 200}
 
 
@@ -47,3 +63,15 @@ async def get_header_image():
     only work if the are available publicly.
     """
     return FileResponse('header.png')
+
+
+@router.get('/slack/install')
+async def install(request: Request):
+    response = await handler.handle(request)
+    return response
+
+
+@router.get('/slack/oauth_redirect')
+async def oauth(request: Request):
+    response = await handler.handle(request)
+    return response
