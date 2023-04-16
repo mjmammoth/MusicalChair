@@ -7,7 +7,7 @@ from functions import publish_home_view, handle_media_url
 @slack_app.event('app_home_opened')
 async def update_home_tab(client, event, logger):
     user_id = event['user']
-    await publish_home_view(user_id)
+    await publish_home_view(user_id, client)
 
 
 @slack_app.event('message')

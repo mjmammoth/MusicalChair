@@ -1,9 +1,9 @@
 from config import settings
-from app_instances import slack_app
-from state_handler import sotd_state
+from state_handler import SongOfTheDayStateHandler
 
 
-async def get_user_home_block(user_id):
+async def get_user_home_block(user_id, client):
+    sotd_state = SongOfTheDayStateHandler(client)
     user_in_pool = await sotd_state.is_user_in_pool(user_id)
 
     # User currently excluded from pool
@@ -87,12 +87,12 @@ footer = [
 ]
 
 
-async def publish_home_view(user_id):
+async def publish_home_view(user_id, client):
     home_view = await home_view_template()
-    home_view['blocks'].extend(await get_user_home_block(user_id))
+    home_view['blocks'].extend(await get_user_home_block(user_id, client))
     home_view['blocks'].extend(footer)
 
-    await slack_app.client.views_publish(
+    await client.views_publish(
         user_id=user_id,
         view=home_view
     )

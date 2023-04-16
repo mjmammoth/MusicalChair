@@ -39,6 +39,8 @@ class BaseConfig():
     PORT = int(os.environ.get('PORT', '8000'))
     DEPLOYMENT_ENV = 'local'
     URL = os.environ.get('LOCAL_URL', f'http://127.0.0.1:{PORT}')
+    SLACK_APP_CLIENT_ID = os.environ.get('SLACK_APP_CLIENT_ID')
+    SLACK_APP_CLIENT_SECRET = os.environ.get('SLACK_APP_CLIENT_SECRET')
 
 
 class GcpConfig(BaseConfig):

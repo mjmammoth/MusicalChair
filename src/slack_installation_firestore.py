@@ -49,29 +49,3 @@ class FirestoreInstallationStore(AsyncInstallationStore):
             )
         else:
             return None
-
-    async def async_find_bot(self, *, team_id: str):
-        print('DEBUG')
-        print(f'async_find_bot: {team_id}')
-        doc_ref = self.db.collection('installations').document(team_id)
-        doc = doc_ref.get()
-        if doc.exists:
-            data = doc.to_dict()
-            bot_token = data['bot_token']
-            app_id = data['app_id']
-            bot_id = data['bot_id']
-            enterprise_id = data.get('enterprise_id')
-            enterprise_name = data.get('enterprise_name')
-            bot_installed_at = data.get('installed_at')
-            bot_refresh_token = data.get('bot_refresh_token')
-            return {
-                'bot_token': bot_token,
-                'app_id': app_id,
-                'bot_id': bot_id,
-                'enterprise_id': enterprise_id,
-                'enterprise_name': enterprise_name,
-                'installed_at': bot_installed_at,
-                'bot_refresh_token': bot_refresh_token
-            }
-        else:
-            return None
