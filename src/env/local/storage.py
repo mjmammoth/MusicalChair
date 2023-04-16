@@ -50,6 +50,9 @@ class CollectionReferenceMock:
         else:
             return iter([DocumentSnapshotMock(doc) for doc in self.data.values()])
 
+    def __str__(self):
+        return f'CollectionReferenceMock({self.data})'
+
 
 class QueryReferenceMock:
     def __init__(self, collection_ref):
