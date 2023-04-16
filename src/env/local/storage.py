@@ -4,20 +4,20 @@ from google.cloud import firestore
 
 
 class FirestoreClientMock:
-    def __init__(self, file_path="firestore_data.json"):
+    def __init__(self, file_path='firestore_data.json'):
         self.file_path = file_path
         self.data = self._load_data_from_file()
 
     def _load_data_from_file(self):
         try:
-            with open(self.file_path, "r") as file:
+            with open(self.file_path, 'r') as file:
                 data = json.load(file)
         except (FileNotFoundError, json.JSONDecodeError):
             data = {}
         return data
 
     def _write_data_to_file(self):
-        with open(self.file_path, "w") as file:
+        with open(self.file_path, 'w') as file:
             json.dump(self.data, file)
 
     def collection(self, name):
@@ -49,7 +49,8 @@ class CollectionReferenceMock:
 
     def order_by(self, field):
         if self.query_results is not None:
-            self.query_results = sorted(self.query_results, key=lambda doc: doc.get(field))
+            self.query_results = sorted(
+                self.query_results, key=lambda doc: doc.get(field))
         return self
 
     def limit(self, limit):
@@ -86,11 +87,14 @@ class QueryReferenceMock:
         query_results = self.collection_ref.data.values()
         for field, op, value in self.conditions:
             if op == '==':
-                query_results = [doc for doc in query_results if doc.get(field) == value]
+                query_results = [
+                    doc for doc in query_results if doc.get(field) == value]
             elif op == '<':
-                query_results = [doc for doc in query_results if doc.get(field) < value]
+                query_results = [
+                    doc for doc in query_results if doc.get(field) < value]
             elif op == '>':
-                query_results = [doc for doc in query_results if doc.get(field) > value]
+                query_results = [
+                    doc for doc in query_results if doc.get(field) > value]
             else:
                 raise ValueError(f'Invalid operator: {op}')
         return QuerySnapshotMock(query_results, self.collection_ref.firestore_client)

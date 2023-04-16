@@ -9,9 +9,9 @@ from slack_installation_firestore import FirestoreInstallationStore
 
 
 oauth_settings = AsyncOAuthSettings(
-    client_id=os.environ["SLACK_APP_CLIENT_ID"],
-    client_secret=os.environ["SLACK_APP_CLIENT_SECRET"],
-    scopes=os.environ["SLACK_APP_SCOPE"].split(','),
+    client_id=os.environ['SLACK_APP_CLIENT_ID'],
+    client_secret=os.environ['SLACK_APP_CLIENT_SECRET'],
+    scopes=os.environ['SLACK_APP_SCOPE'].split(','),
     installation_store=FirestoreInstallationStore()
 )
 
