@@ -1,29 +1,48 @@
+import json
+
 from google.cloud import firestore
 
 
 class FirestoreClientMock:
-    def __init__(self):
-        self.data = {}
+    def __init__(self, file_path="firestore_data.json"):
+        self.file_path = file_path
+        self.data = self._load_data_from_file()
+
+    def _load_data_from_file(self):
+        try:
+            with open(self.file_path, "r") as file:
+                data = json.load(file)
+        except (FileNotFoundError, json.JSONDecodeError):
+            data = {}
+        return data
+
+    def _write_data_to_file(self):
+        with open(self.file_path, "w") as file:
+            json.dump(self.data, file)
 
     def collection(self, name):
         if name not in self.data:
             self.data[name] = {}
-        return CollectionReferenceMock(self.data[name])
+            self._write_data_to_file()
+        return CollectionReferenceMock(self.data[name], self)
 
 
 class CollectionReferenceMock:
-    def __init__(self, data):
+    def __init__(self, data, firestore_client):
         self.data = data
+        self.firestore_client = firestore_client
 
     def document(self, doc_id):
         if doc_id not in self.data:
             self.data[doc_id] = {}
-        return DocumentReferenceMock(self.data[doc_id])
+            self.firestore_client._write_data_to_file()
+        return DocumentReferenceMock(self.data[doc_id], self.firestore_client)
 
     def add(self, data):
         doc_id = str(len(self.data) + 1)
         self.data[doc_id] = data
-        return DocumentReferenceMock(self.data[doc_id])
+        self.firestore_client._write_data_to_file()
+        return DocumentReferenceMock(self.data[doc_id], self.firestore_client)
 
     def where(self, field, op, value):
         return QueryReferenceMock(self).where(field, op, value)
@@ -40,15 +59,15 @@ class CollectionReferenceMock:
 
     def get(self):
         if not self.data:
-            return QuerySnapshotMock([])
+            return QuerySnapshotMock([], self.firestore_client)
         else:
-            return QuerySnapshotMock(list(self.data.values()))
+            return QuerySnapshotMock(list(self.data.values()), self.firestore_client)
 
     def stream(self):
         if not self.data:
             return iter([])
         else:
-            return iter([DocumentSnapshotMock(doc) for doc in self.data.values()])
+            return iter([DocumentSnapshotMock(doc, self.firestore_client) for doc in self.data.values()])
 
     def __str__(self):
         return f'CollectionReferenceMock({self.data})'
@@ -74,7 +93,7 @@ class QueryReferenceMock:
                 query_results = [doc for doc in query_results if doc.get(field) > value]
             else:
                 raise ValueError(f'Invalid operator: {op}')
-        return QuerySnapshotMock(query_results)
+        return QuerySnapshotMock(query_results, self.collection_ref.firestore_client)
 
     def order_by(self, field):
         # ...
@@ -86,14 +105,16 @@ class QueryReferenceMock:
 
 
 class DocumentReferenceMock:
-    def __init__(self, data):
+    def __init__(self, data, firestore_client):
         self.data = data
+        self.firestore_client = firestore_client
 
     def get(self):
-        return DocumentSnapshotMock(self.data)
+        return DocumentSnapshotMock(self.data, self.firestore_client)
 
     def set(self, data):
         self.data.update(data)
+        self.firestore_client._write_data_to_file()
 
     def update(self, data):
         for key, value in data.items():
@@ -103,22 +124,23 @@ class DocumentReferenceMock:
                 self.data[key].extend(value.values)
             else:
                 self.data[key] = value
+        self.firestore_client._write_data_to_file()
 
     @property
     def exists(self):
         return bool(self.data)
 
 
-
 class QuerySnapshotMock:
-    def __init__(self, data):
+    def __init__(self, data, firestore_client):
         self.data = data
+        self.firestore_client = firestore_client
 
     def __iter__(self):
-        return iter([DocumentSnapshotMock(doc) for doc in self.data])
+        return iter([DocumentSnapshotMock(doc, self.firestore_client) for doc in self.data])
 
     def __getitem__(self, index):
-        return DocumentSnapshotMock(self.data[index])
+        return DocumentSnapshotMock(self.data[index], self.firestore_client)
 
     def __len__(self):
         return len(self.data)
@@ -128,9 +150,13 @@ class QuerySnapshotMock:
 
 
 class DocumentSnapshotMock:
-    def __init__(self, data):
+    def __init__(self, data, firestore_client):
         self.data = data
-        self.reference = DocumentReferenceMock(data)
+        self.firestore_client = firestore_client
+
+    @property
+    def reference(self):
+        return DocumentReferenceMock(self.data, self.firestore_client)
 
     def to_dict(self):
         return self.data
