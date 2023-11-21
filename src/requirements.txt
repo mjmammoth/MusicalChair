@@ -6,5 +6,5 @@ google-cloud-run==0.7.1
 google-cloud-storage==2.8.0
 Jinja2==3.1.2
 python-multipart==0.0.6
-slack-bolt==1.17.0
+slack-bolt==1.18.1
 uvicorn==0.21.1
