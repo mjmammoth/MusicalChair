@@ -122,7 +122,14 @@ resource "google_cloud_run_v2_service" "musical_chair" {
           }
         }
       }
-
+      env {
+        name = "GCP_REGION"
+        value = var.region
+      }
+      env {
+        name = "GCP_SERVICE_NAME"
+        value = google_cloud_run_v2_service.musical_chair.name
+      }
     }
   }
   depends_on = [google_secret_manager_secret_iam_member.slack_bot_token_secret_access,
