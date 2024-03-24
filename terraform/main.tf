@@ -23,6 +23,11 @@ variable "slack_bot_signing_secret" {
   description = "Slack signing secret to verify the request is from Slack"
   type        = string
 }
+variable "gcp_service_name" {
+  description = "GCP service name"
+  type        = string
+  default     = "musical-chair-cr"
+}
 provider "google" {
   project = var.project_id
   region  = var.region
@@ -58,14 +63,14 @@ resource "google_storage_bucket" "tfstate" {
 resource "google_secret_manager_secret" "slack_bot_token" {
   secret_id = "musical-chair-slack-bot-token"
   replication {
-    automatic = true
+    auto {}
   }
 }
 
 resource "google_secret_manager_secret" "slack_bot_signing_secret" {
   secret_id = "musical-chair-slack-signing-secret"
   replication {
-    automatic = true
+    auto {}
   }
 }
 
@@ -92,7 +97,7 @@ resource "google_secret_manager_secret_iam_member" "slack_bot_signing_secret_acc
 }
 
 resource "google_cloud_run_v2_service" "musical_chair" {
-  name     = "musical-chair-cr"
+  name     = var.gcp_service_name
   location = var.region
   template {
     scaling {
@@ -128,7 +133,7 @@ resource "google_cloud_run_v2_service" "musical_chair" {
       }
       env {
         name = "GCP_SERVICE_NAME"
-        value = google_cloud_run_v2_service.musical_chair.name
+        value = var.gcp_service_name
       }
     }
   }
