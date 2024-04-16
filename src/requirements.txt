@@ -1,4 +1,4 @@
-aiohttp==3.8.4
+aiohttp==3.9.5
 fastapi==0.95.0
 google-api-python-client==2.84.0
 google-cloud-firestore==2.11.0
